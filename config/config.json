@@ -1,0 +1,17 @@
+{
+    "database": {
+        "host": "localhost",
+        "port": 5430,
+        "name": "deall-job",
+        "user": "admin",
+        "password": "admin1234"
+    },
+    "jwt": {
+        "access_name": "secret-key",
+        "access_secret": "r4nd0m_secret_access",
+        "access_exp": 30,
+        "refresh_name": "refresh-key",
+        "refresh_secret": "r4nd0m_secret_refresh",
+        "refresh_exp": 2592000
+    }
+}
