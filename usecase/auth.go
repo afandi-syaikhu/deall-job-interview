@@ -55,6 +55,29 @@ func (_a *Auth) Login(ctx context.Context, data model.User) (*model.Token, error
 	}, nil
 }
 
+func (_a *Auth) RefreshToken(ctx context.Context, data model.User) (*model.Token, error) {
+	user, err := _a.UserRepo.FindById(ctx, data.ID)
+	if err != nil && err == sql.ErrNoRows {
+		return nil, errors.New(constant.NotFound)
+	}
+
+	if err != nil {
+		log.Errorf("[%s] => %s", "AuthUC.RefreshToken", err.Error())
+		return nil, err
+	}
+
+	accessToken, err := _a.generateJWT(*user, _a.Config.Jwt.AccessSecret, _a.Config.Jwt.AccessExp)
+	if err != nil {
+		log.Errorf("[%s] => %s", "AuthUC.RefreshToken", err.Error())
+		return nil, err
+	}
+
+	return &model.Token{
+		AccessToken: accessToken,
+		Type:        constant.BearerType,
+	}, nil
+}
+
 func (_a *Auth) generateJWT(user model.User, secretKey string, expTime int) (string, error) {
 	now := time.Now()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &model.Claims{

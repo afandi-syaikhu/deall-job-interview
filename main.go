@@ -48,7 +48,7 @@ func main() {
 	e.Validator = pkg.GetValidator()
 
 	// init handler
-	rest.NewAuthHandler(e, authUC)
+	rest.NewAuthHandler(e, mw, authUC)
 	rest.NewUserHandler(e, mw, userUC)
 
 	e.Logger.Fatal(e.Start(":8080"))

@@ -86,6 +86,53 @@ func (_m *Middleware) MustAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+func (_m *Middleware) MustHaveRefreshToken(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		req := c.Request()
+		authHeader := req.Header.Get("Authorization")
+		if authHeader == "" {
+			return httpError(http.StatusUnauthorized, constant.InvalidToken)
+		}
+
+		sAuthHeaders := strings.Split(authHeader, " ")
+		if len(sAuthHeaders) != 2 || sAuthHeaders[0] != "Bearer" || sAuthHeaders[1] == "" {
+			return httpError(http.StatusUnauthorized, constant.InvalidToken)
+		}
+
+		refreshToken := sAuthHeaders[1]
+		refreshSecret := []byte(_m.Config.Jwt.RefreshSecret)
+		token, err := jwt.ParseWithClaims(refreshToken, &model.Claims{}, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, errors.New(constant.ExpiredToken)
+			}
+
+			return refreshSecret, nil
+		})
+
+		if err != nil {
+			return httpError(http.StatusUnauthorized, err.Error())
+		}
+
+		claims, ok := token.Claims.(*model.Claims)
+		if !ok || !token.Valid {
+			return httpError(http.StatusUnauthorized, constant.InvalidToken)
+		}
+
+		user, err := _m.UserUseCase.FindById(c.Request().Context(), claims.UserId)
+		if err != nil && err.Error() == constant.NotFound {
+			return httpError(http.StatusUnauthorized, constant.UserNotExist)
+		}
+
+		if err != nil {
+			return httpError(http.StatusInternalServerError, constant.InternalServerError)
+		}
+
+		c.Set(constant.KeyUser, user)
+
+		return next(c)
+	}
+}
+
 func httpError(status int, message string) *echo.HTTPError {
 	return echo.NewHTTPError(status, model.Response{
 		Message: message,
