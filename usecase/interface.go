@@ -9,6 +9,7 @@ import (
 //go:generate mockgen -destination=mock/auth_mock.go -package=mock github.com/afandi-syaikhu/deall-job-interview/usecase AuthUseCase
 type AuthUseCase interface {
 	Login(ctx context.Context, data model.User) (*model.Token, error)
+	RefreshToken(ctx context.Context, data model.User) (*model.Token, error)
 }
 
 //go:generate mockgen -destination=mock/user_mock.go -package=mock github.com/afandi-syaikhu/deall-job-interview/usecase UserUseCase
