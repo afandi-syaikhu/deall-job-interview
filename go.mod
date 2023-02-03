@@ -5,6 +5,7 @@ go 1.19
 require github.com/go-pg/migrations v6.7.3+incompatible
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator v9.31.0+incompatible // indirect

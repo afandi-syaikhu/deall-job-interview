@@ -56,11 +56,13 @@ func (_a *Auth) Login(ctx context.Context, data model.User) (*model.Token, error
 }
 
 func (_a *Auth) generateJWT(user model.User, secretKey string, expTime int) (string, error) {
+	now := time.Now()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &model.Claims{
-		Username: user.Username,
-		Role:     user.Role,
+		UserId: user.ID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Second * time.Duration(expTime)).Unix(),
+			IssuedAt:  now.Unix(),
+			NotBefore: now.Unix(),
 		},
 	})
 
