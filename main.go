@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/afandi-syaikhu/deall-job-interview/config"
+	"github.com/afandi-syaikhu/deall-job-interview/delivery/middleware"
 	"github.com/afandi-syaikhu/deall-job-interview/delivery/rest"
 	"github.com/afandi-syaikhu/deall-job-interview/pkg"
 	"github.com/afandi-syaikhu/deall-job-interview/repository"
@@ -37,6 +38,10 @@ func main() {
 
 	// init usecase
 	authUC := usecase.NewAuthUseCase(userRepo, cfg)
+	userUC := usecase.NewUserUseCase(userRepo)
+
+	// init middleware
+	mw := middleware.New(cfg, userUC)
 
 	// init echo framework
 	e := echo.New()
@@ -44,6 +49,7 @@ func main() {
 
 	// init handler
 	rest.NewAuthHandler(e, authUC)
+	rest.NewUserHandler(e, mw, userUC)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

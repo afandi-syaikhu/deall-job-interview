@@ -3,7 +3,6 @@ package model
 import "github.com/golang-jwt/jwt"
 
 type Claims struct {
-	Username string `json:"username"`
-	Role     Role   `json:"role"`
+	UserId int64 `json:"user_id"`
 	jwt.StandardClaims
 }

@@ -24,18 +24,19 @@ func NewAuthHandler(e *echo.Echo, authUseCase usecase.AuthUseCase) {
 
 func (_a *AuthHandler) Login(c echo.Context) error {
 	ctx := c.Request().Context()
-	errResponse := model.ErrorResponse{}
+	response := model.Response{}
 	body := model.LoginRequest{}
-	if err := c.Bind(&body); err != nil {
-		errResponse.Message = constant.BadRequest
-		c.JSON(http.StatusBadRequest, errResponse)
+	err := c.Bind(&body)
+	if err != nil {
+		response.Message = constant.BadRequest
+		c.JSON(http.StatusBadRequest, response)
 
 		return echo.ErrBadRequest
 	}
 
 	if err := c.Validate(body); err != nil {
-		errResponse.Message = err.Error()
-		c.JSON(http.StatusBadRequest, errResponse)
+		response.Message = err.Error()
+		c.JSON(http.StatusBadRequest, response)
 
 		return err
 	}
@@ -47,44 +48,18 @@ func (_a *AuthHandler) Login(c echo.Context) error {
 
 	res, err := _a.AuthUseCase.Login(ctx, user)
 	if err != nil && err.Error() == constant.InvalidCredential {
-		errResponse.Message = constant.InvalidCredential
-		c.JSON(http.StatusUnauthorized, errResponse)
+		response.Message = constant.InvalidCredential
+		c.JSON(http.StatusUnauthorized, response)
 
 		return echo.ErrUnauthorized
 	}
 
 	if err != nil {
-		errResponse.Message = constant.InternalServerError
-		c.JSON(http.StatusInternalServerError, errResponse)
+		response.Message = constant.InternalServerError
+		c.JSON(http.StatusInternalServerError, response)
 
 		return echo.ErrInternalServerError
 	}
 
-	_a.setTokenCookie(res.AccessToken, c)
-	_a.setUserCookie(&user, c)
-
 	return c.JSON(http.StatusOK, res)
-}
-
-// Here we are creating a new cookie, which will store the valid JWT token.
-func (_a *AuthHandler) setTokenCookie(token string, c echo.Context) {
-	cookie := new(http.Cookie)
-	cookie.Name = "secret-key"
-	cookie.Value = token
-	// cookie.Expires = expiration
-	cookie.Path = "/"
-	// Http-only helps mitigate the risk of client side script accessing the protected cookie.
-	cookie.HttpOnly = true
-
-	c.SetCookie(cookie)
-}
-
-// Purpose of this cookie is to store the user's name.
-func (_a *AuthHandler) setUserCookie(user *model.User, c echo.Context) {
-	cookie := new(http.Cookie)
-	cookie.Name = "user"
-	cookie.Value = user.Username
-	// cookie.Expires = expiration
-	cookie.Path = "/"
-	c.SetCookie(cookie)
 }
