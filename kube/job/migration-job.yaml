@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migration
+spec:
+  template:
+    spec:
+      containers:
+      - name: migration
+        image: afandisyaikhu/deall-job-interview-migration:1.0.0
+        command:
+          - /bin/sh
+          - -c
+          - |
+            /app/migrations/migration init
+            /app/migrations/migration up
+      restartPolicy: Never
