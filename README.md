@@ -13,6 +13,9 @@
 
 All deployment files are stored at [kube directory](https://github.com/afandi-syaikhu/deall-job-interview/tree/master/kube)
 
+Kubernetes local deployment:
+![Kube](./asset/images/kube_deploy.png)
+
 ## API Docs
 
 API documentation (Postman) is available at [api-docs directory](https://github.com/afandi-syaikhu/deall-job-interview/tree/master/asset/api-docs)
