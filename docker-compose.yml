@@ -1,5 +1,5 @@
 services:
-  db:
+  postgres:
     image: postgres
     ports:
       - "5430:5432"
@@ -7,3 +7,26 @@ services:
       POSTGRES_DB: deall-job
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin1234
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d deall-job -U admin"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  migration:
+    image: afandisyaikhu/deall-job-interview-migration:1.0.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - /bin/sh
+      - -c
+      - |
+        /app/migrations/migration init
+        /app/migrations/migration up
+  api:
+    image: afandisyaikhu/deall-job-interview-api:1.0.0
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
